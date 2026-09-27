@@ -1,27 +1,27 @@
 package Transformers.Discools.service;
 
 import org.springframework.stereotype.Service;
-import Transformers.Discools.repository.Banco;
+import Transformers.Discools.repository.CategoriaDiscoRepository;
+import Transformers.Discools.repository.DiscoRepository;
 import Transformers.Discools.model.CategoriaDisco;
 import Transformers.Discools.model.DiscosCD;
-import java.util.List;
 
 @Service
 public class DiscoService {
 
-    /*
-    public List<DiscosCD> listarTodos() {
-        return Banco.obterTodosDiscos();
-    }
-     */
-       
-    // REGRA DE NEGÓCIO 1: Pega uma categoria (em alta, lançamentos, recomendados) e retorna os discos dela
-    public CategoriaDisco listarPorCategoria(int categoriaId) {
-        return Banco.buscarCategoriaPorId(categoriaId);
+    private final CategoriaDiscoRepository categoriaDiscoRepository;
+    private final DiscoRepository discoRepository;
+
+    public DiscoService(CategoriaDiscoRepository categoriaDiscoRepository, DiscoRepository discoRepository) {
+        this.categoriaDiscoRepository = categoriaDiscoRepository;
+        this.discoRepository = discoRepository;
     }
 
-    // REGRA DE NEGÓCIO 2: Pega um disco específico e retorna suas informações
+    public CategoriaDisco listarPorCategoria(int categoriaId) {
+        return categoriaDiscoRepository.findById(categoriaId).orElse(null);
+    }
+
     public DiscosCD buscarPorId(int id) {
-        return Banco.buscarDiscoPorId(id);
+        return discoRepository.findById(id).orElse(null);
     }
 }

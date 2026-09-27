@@ -1,12 +1,25 @@
 package Transformers.Discools.model;
 
+import jakarta.persistence.Access;
+import jakarta.persistence.AccessType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
+@Entity
+@Access(AccessType.FIELD)
 public class DiscosCD {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String nome;
     private String artista;
     private String genero;
     private int duracao;
     private float preco;
+    @Column(length = 2000)
     private String descricao;
     private int estoque;
     private String tipo;
