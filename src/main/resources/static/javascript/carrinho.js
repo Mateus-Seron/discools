@@ -3,11 +3,22 @@
    ===================================================== */
 
 const CART_KEY = 'discools_cart_v1';
+const QUANTIDADE_INICIAL = 1;
 
 /* ---------- Helpers ---------- */
 function loadCart() {
   const raw = localStorage.getItem(CART_KEY);
-  return raw ? JSON.parse(raw) : [];
+  if (!raw) {
+    return [];
+  }
+
+  try {
+    const cart = JSON.parse(raw);
+    return Array.isArray(cart) ? cart : [];
+  } catch (erro) {
+    console.error('Carrinho salvo inválido. Iniciando vazio.', erro);
+    return [];
+  }
 }
 
 function saveCart(cart) {
@@ -17,11 +28,29 @@ function saveCart(cart) {
 function addToCart(item) {
   const cart = loadCart();
   const found = cart.find(i => i.id === item.id);
+  const nome = item.nome ?? item.title;
+  const preco = item.preco ?? item.price;
 
   if (found) {
-    found.qty = (found.qty || 1) + 1;
+    found.quantidade = (found.quantidade || QUANTIDADE_INICIAL) + 1;
   } else {
-    cart.push({ ...item, qty: 1 });
+    cart.push({ id: item.id, nome: nome, preco: preco, quantidade: QUANTIDADE_INICIAL });
+  }
+
+  saveCart(cart);
+  renderCart();
+}
+
+function alterarQuantidade(id, delta) {
+  let cart = loadCart();
+  const found = cart.find(i => i.id === id);
+  if (!found) {
+    return;
+  }
+
+  found.quantidade += delta;
+  if (found.quantidade <= 0) {
+    cart = cart.filter(i => i.id !== id);
   }
 
   saveCart(cart);
@@ -71,8 +100,8 @@ function renderCart() {
     el.innerHTML = `
       <div style="display:flex;justify-content:space-between;align-items:center">
         <div>
-          <div style="font-weight:800">${item.title}</div>
-          <div style="font-size:13px;color:#2b1b3c">R$ ${item.price.toFixed(2)} x ${item.qty}</div>
+          <div style="font-weight:800">${item.nome}</div>
+          <div style="font-size:13px;color:#2b1b3c">R$ ${item.preco.toFixed(2)} x ${item.quantidade}</div>
         </div>
         <div>
           <button class="btn-dec" data-id="${item.id}">-</button>
@@ -86,32 +115,13 @@ function renderCart() {
   // Eventos
   container.querySelectorAll('.btn-inc').forEach(btn =>
     btn.addEventListener('click', e => {
-      const id = Number(e.target.dataset.id);
-      const cart = loadCart();
-      const it = cart.find(i => i.id === id);
-      if (it) {
-        it.qty++;
-        saveCart(cart);
-        renderCart();
-      }
+      alterarQuantidade(Number(e.target.dataset.id), 1);
     })
   );
 
   container.querySelectorAll('.btn-dec').forEach(btn =>
     btn.addEventListener('click', e => {
-      const id = Number(e.target.dataset.id);
-      let cart = loadCart();
-      const it = cart.find(i => i.id === id);
-
-      if (!it) return;
-
-      it.qty--;
-      if (it.qty <= 0) {
-        cart = cart.filter(i => i.id !== id);
-      }
-
-      saveCart(cart);
-      renderCart();
+      alterarQuantidade(Number(e.target.dataset.id), -1);
     })
   );
 }
